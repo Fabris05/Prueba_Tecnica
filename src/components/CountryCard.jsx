@@ -1,4 +1,5 @@
 import { ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function CountryCard({ country }) {
     return (
@@ -18,7 +19,7 @@ export default function CountryCard({ country }) {
                         Código: {country.cca3}
                     </span>
                 </p>
-                <button
+                <Link
                     to={`/country/${country.cca3}`}
                     className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors cursor-pointer"
                 >
@@ -27,7 +28,7 @@ export default function CountryCard({ country }) {
                         size={16}
                         className="inline-block ml-2 w-4 h-4"
                     />
-                </button>
+                </Link>
             </div>
         </div>
     );

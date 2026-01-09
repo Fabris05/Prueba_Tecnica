@@ -1,23 +1,49 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGetAllCountriesQuery } from "../services/countriesApi";
 import CountryCard from "../components/CountryCard";
 import LoaderSpin from "../components/ui/Loader";
 import { Search } from "lucide-react";
+import Paginator from "../components/ui/Paginator";
 
 export default function Home() {
     const { data: countries, error, isLoading } = useGetAllCountriesQuery();
     const [searchItem, setSearchItem] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 8;
+    
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchItem]);
 
     const filteredCountries = countries?.filter((country) =>
         country.name.common.toLowerCase().includes(searchItem.toLowerCase())
     );
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
+    const currentCountries = filteredCountries?.slice(
+        indexOfFirstItem,
+        indexOfLastItem
+    );
+    const totalPages = Math.ceil(
+        (filteredCountries?.length || 0) / itemsPerPage
+    );
+
+    const handleNext = () => {
+        if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
+    };
+
+    const handlePrev = () => {
+        if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+    };
 
     if (isLoading) return <LoaderSpin />;
     if (error) return <div>Error al cargar los países</div>;
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <div className="mb-8 flex justify-center">
+            <div className="mb-8 flex justify-end">
                 <div className="relative w-full max-w-md">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <Search className="text-gray-400" size={20} />
@@ -32,8 +58,8 @@ export default function Home() {
                 </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {filteredCountries?.length > 0 ? (
-                    filteredCountries.map((country) => (
+                {currentCountries?.length > 0 ? (
+                    currentCountries.map((country) => (
                         <CountryCard key={country.cca3} country={country} />
                     ))
                 ) : (
@@ -43,6 +69,14 @@ export default function Home() {
                     </p>
                 )}
             </div>
+            <Paginator
+                currentPage={currentPage}
+                totalPages={totalPages}
+                handleNext={handleNext}
+                handlePrev={handlePrev}
+                filteredCountries={filteredCountries}
+                changeCurrentPage={setCurrentPage}
+            />
         </div>
     );
 }
