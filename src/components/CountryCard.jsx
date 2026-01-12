@@ -1,9 +1,17 @@
 import { ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { cardVariants } from "../utils/animations";
 
 export default function CountryCard({ country }) {
     return (
-        <div className="bg-white border border-gray-300 p-4 rounded-md shadow-sm hover:shadow-lg transition-shadow duration-300">
+        <motion.div
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            whileHover="hover"
+            className="bg-white border border-gray-300 p-4 rounded-md shadow-sm hover:shadow-lg transition-shadow duration-300"
+        >
             <img
                 src={country.flags.svg}
                 alt={country.flags.alt}
@@ -30,6 +38,6 @@ export default function CountryCard({ country }) {
                     />
                 </Link>
             </div>
-        </div>
+        </motion.div>
     );
 }

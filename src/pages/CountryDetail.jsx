@@ -3,10 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, BookMarked } from "lucide-react";
 import TravelForm from "../components/TravelForm";
 import LoaderSpin from "../components/ui/Loader";
-import { useState } from "react";
+import { useModal } from "../hooks/useModal";
 
 export default function CountryDetail() {
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const {isModalOpen, openModal, closeModal} = useModal();
     const { code } = useParams();
     const navigate = useNavigate();
 
@@ -16,10 +16,6 @@ export default function CountryDetail() {
     if (isLoading) return <LoaderSpin />;
     if (error || !country)
         return <div>Error al cargar los detalles del país</div>;
-
-    const handleOpenModal = () => {
-        setIsModalOpen(true);
-    };
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -77,7 +73,7 @@ export default function CountryDetail() {
                     </div>
                     <div className="mt-8">
                         <button
-                            onClick={handleOpenModal}
+                            onClick={openModal}
                             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition w-full md:w-auto font-semibold cursor-pointer"
                         >
                             Registrar visita
@@ -92,7 +88,7 @@ export default function CountryDetail() {
             {isModalOpen && (
                 <TravelForm
                     countryName={country.name.common}
-                    onClose={() => setIsModalOpen(false)}
+                    onClose={closeModal}
                 />
             )}
         </div>

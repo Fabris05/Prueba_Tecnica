@@ -1,38 +1,40 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { X } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { tripSchema } from "../schemas/tripSchema";
-import { correctAlert } from "../utils/alerts";
+import { useEffect } from "react";
+import { useTravelForm } from "../hooks/useTravelForm";
 
-export default function TravelForm({ countryName, onClose }) {
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-        reset,
-    } = useForm({
-        resolver: zodResolver(tripSchema),
-        defaultValues: {
-            countryName: countryName || "",
-            date: "",
-            airline: "",
-            rating: 5,
-            description: "",
-        },
-    });
+export default function TravelForm({ countryName, onClose, tripToEdit }) {
+    
+    const isEditMode = !!tripToEdit;
 
-    const onSubmit = (data) => {
-        console.log("Datos limpios:", data); 
-        correctAlert();
-        onClose();
-    };
+    const { onSubmit, register, handleSubmit, errors, isLoading, setValue } =
+        useTravelForm({ countryName, onClose, isEditMode, tripToEdit });
+
+    useEffect(() => {
+        if (tripToEdit) {
+            setValue(
+                "countryName",
+                tripToEdit.countryName || tripToEdit.title
+            );
+            setValue("airline", tripToEdit.airline);
+            setValue("rating", tripToEdit.rating);
+            setValue(
+                "description",
+                tripToEdit.description || tripToEdit.body
+            );
+            setValue("date", tripToEdit.date);
+        }
+    }, [tripToEdit, setValue]);
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden relative animate-fade-in">
                 <div className="bg-blue-600 p-4 flex justify-between items-center text-white">
                     <h2 className="text-lg font-bold">
-                        Registrar viaje a {countryName}
+                        {isEditMode
+                            ? `Editar Viaje a ${
+                                  tripToEdit.countryName || tripToEdit.title
+                              }`
+                            : `Registrar Nuevo Viaje ${countryName ? `a ${countryName}` : ''}`}
                     </h2>
                     <button
                         onClick={onClose}
@@ -42,7 +44,7 @@ export default function TravelForm({ countryName, onClose }) {
                         <X size={20} />
                     </button>
                 </div>
-                
+
                 <form
                     onSubmit={handleSubmit(onSubmit)}
                     className="p-6 space-y-4"
@@ -105,7 +107,7 @@ export default function TravelForm({ countryName, onClose }) {
                         <textarea
                             rows={3}
                             placeholder="¿Qué fue lo que más te gustó?"
-                            {...register("description")} 
+                            {...register("description")}
                             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                         ></textarea>
 
@@ -116,7 +118,6 @@ export default function TravelForm({ countryName, onClose }) {
                         )}
                     </div>
 
-                    {/* BOTONES */}
                     <div className="flex justify-end gap-2 pt-2">
                         <button
                             type="button"
@@ -130,7 +131,11 @@ export default function TravelForm({ countryName, onClose }) {
                             type="submit"
                             className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 cursor-pointer font-medium"
                         >
-                            Guardar viaje
+                            {isLoading
+                                ? "Guardando..."
+                                : isEditMode
+                                ? "Guardar Cambios"
+                                : "Guardar Viaje"}
                         </button>
                     </div>
                 </form>
